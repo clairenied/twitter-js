@@ -2,9 +2,27 @@ const express = require('express')
 const app = express()
 const chalk = require('chalk')
 const morgan = require('morgan')
+const nunjucks = require('nunjucks')
 
 
 app.use(morgan('tiny'))
+
+
+const people = [
+		{
+			name: "Gandolf"
+		},
+		{
+			name: "Frodo"
+		},
+		{
+			name: "Hermione?!?!?!!"
+		}
+	]
+
+app.set('view engine', 'html')
+app.engine('html', nunjucks.render)
+nunjucks.configure('views', { noCache: true })
 
 
 app.use('/', function(req, res, next){
@@ -20,7 +38,7 @@ app.use('/hal', function(req, res, next){
 
 
 app.get('/', function(req, res){
-	res.send('Welcome')
+	res.render('index', { title: 'Lord of the Rings??', people: people } )
 })
 
 app.get('/hal', function(req, res){
