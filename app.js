@@ -1,22 +1,29 @@
 const express = require('express')
 const app = express()
-const chalk = require('chalk')
 const morgan = require('morgan')
 const nunjucks = require('nunjucks')
-
+const tweetbank = require('./lib/tweet-bank')
+const routes = require('./routes')
+const bodyParser = require('body-parser')
+const socketio = require('socket.io')
 
 app.use(morgan('tiny'))
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json())
 
 
 const people = [
 		{
-			name: "Gandolf"
+			name: "Gandolf",
+			hasHamburger: false
 		},
 		{
-			name: "Frodo"
+			name: "Frodo",
+			hasHamburger: true
 		},
 		{
-			name: "Hermione?!?!?!!"
+			name: "Hermione?!?!?!!",
+			hasHamburger: false
 		}
 	]
 
@@ -24,28 +31,9 @@ app.set('view engine', 'html')
 app.engine('html', nunjucks.render)
 nunjucks.configure('views', { noCache: true })
 
-
-app.use('/', function(req, res, next){
-	console.log(chalk.magenta.bgBlue.bold(req.method, req.url, res.statusCode))
-	next()
-})
-
-
-app.use('/hal', function(req, res, next){
-	console.log(chalk.magenta.bgCyan.bold('Hal'))
-	next()
-})
-
-
-app.get('/', function(req, res){
-	res.render('index', { title: 'Lord of the Rings??', people: people } )
-})
-
-app.get('/hal', function(req, res){
-	res.send('hi hal!!!')
-})
-
-
-app.listen(3000, function(){
+const server = app.listen(3000, function(){
 	console.log('App listening on port 3000!!!!! : )')
 })
+
+const io = socketio.listen(server);
+app.use('/', routes(io))
